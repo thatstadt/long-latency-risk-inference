@@ -126,7 +126,7 @@ The framework evaluates counterfactual behavior under stated assumptions; it doe
 - `analysis/figures.ipynb` — visualization and sensitivity-analysis notebook
 - `Data/` — saved outputs from BMI and latency-decay sensitivity experiments
 - `Graphs/` — figures generated from the analysis
-- `artifacts/' - related research artifacts
+- `artifacts/` — related research artifacts
 - `README.md` — mathematical framing, research trajectory, and repository guide
 
 This structure intentionally separates the simulation model, analysis, and preserved results so the framework can be inspected as a self-contained reference.
@@ -139,9 +139,9 @@ These artifacts document the original application-driven phase of the project:
 
 **[Preprint (bioRxiv)](https://doi.org/10.64898/2026.01.29.702692):** application-focused manuscript on obesity and young-onset rheumatoid arthritis 
 
-**[AAI Midwinter Conference Poster](artifacts/AAI_Midwinter_Poster.pdf):** presentation of the original modeling work 
+**[AAI Midwinter Conference Poster](artifacts/AAIMidwinterConference2026_poster.pdf):** presentation of the original modeling work 
 
-**[Research Process Essay](artifacts/Research_Process)Essay.pdf):** account of the research and model-development process behind the original study
+**[Research Process Essay](artifacts/Process_Essay.pdf):** account of the research and model-development process behind the original study
 
 ---
 

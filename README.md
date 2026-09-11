@@ -1,91 +1,156 @@
-# Stochastic Simulation Modeling of Long-Latency Risk in Young-Onset Rheumatoid Arthritis
+# A Stochastic Framework for Understanding Long-Latency Inference in Complex Systems
 
 
-> **Key Idea:** Population-level disease dynamics can be reproduced by simulating structured individual-level risk using stochastic, Monte Carlo–based models.
-
----
-
-> **What’s Novel:** This work models long-latency risk by explicitly perturbing population-level exposure distributions and evaluating their effects through stochastic simulation, enabling counterfactual analysis that is difficult to achieve with observational data alone.
+> **Key Idea:** Using population simulation and counterfactual perturbation to study delayed, partially observed risk, developed through an application to young-onset rheumatoid arthritis.
 
 ---
  
-## Overview
+## Research Question
 
-This repository implements a stochastic, Monte Carlo–based simulation framework for modeling rheumatoid arthritis risk at the population level. The model generates large synthetic populations and assigns disease outcomes probabilistically using parameterized risk functions derived from epidemiological data. It is designed to evaluate how individual-level risk factors scale into population-level disease patterns under varying epidemiological assumptions.
+How can we infer the population-level consequences of an exposure when its effects are delayed, exposure histories are incomplete, and the counterfactual outcome cannot be observed directly?
 
-A central focus is modeling long-latency exposure effects by perturbing BMI distributions across age groups and analyzing their impact under counterfactual scenarios. Simulated outputs are compared against Global Burden of Disease estimates to assess consistency with observed prevalence patterns.
-
----
-
-## Method Summary
-
-Each simulation generates a large synthetic population and assigns disease outcomes probabilistically using parameterized risk functions.
-
-Individual risk is modeled as a function of baseline prevalence, BMI-dependent modifiers, and age-dependent attenuation to reflect long-latency exposure effects. Monte Carlo sampling is used to assign outcomes across individuals, and results are aggregated over repeated trials to estimate prevalence distributions.
-
-The framework enables systematic perturbation of BMI distributions across age groups, allowing for counterfactual analysis of how changes in population-level risk factors influence disease prevalence.
+This question emerged from studying obesity and young-onset rheumatoid arthritis, reframing a biological problem as one of long-latency inference under uncertainty.
 
 ---
 
-## Scale
+## Research Evolution
 
-Each simulation run generates a synthetic population of approximately 1,000,000 individuals. Results are aggregated over ~2,500 Monte Carlo trials to estimate prevalence distributions and assess variability under different parameter configurations.
+Stage I — Biological Question → Computational Model (Jan 2025 – Jun 2026)
 
-The simulation is implemented in Java, with downstream analysis and visualization conducted in Python using Jupyter notebooks.
+The project began with a biological question and moved to stochastic simulation when conventional observational approaches could not capture long-latency effects.
+
+Stage II — Computational Model → Mathematical Inference Framework (Summer 2026)
+
+The focus shifted from rheumatoid arthritis itself to the underlying problems of stochastic modeling, counterfactual inference, parameter uncertainty, and validation. This repository preserves that framework.
+
+Stage III — Empirical Validation and Methodological Extension (Sep 2026 – Present)
+
+Current work moves to patient-level longitudinal data to test the framework empirically and identify where deeper statistical or mathematical methods are needed.
+
+---
+
+## Mathematical Framework
+
+The model treats long-latency risk as a stochastic population-level inference problem. A synthetic population is generated from specified demographic and exposure distributions, individual disease probabilities are constructed from parameterized risk contributions, and outcomes are sampled probabilistically. Counterfactual perturbations are then applied to exposure distributions to examine how changes at the individual level propagate into population-level disease patterns.
+
+The framework has five main components: a synthetic population model, an individual risk model, a long-latency exposure model, counterfactual perturbation, and Monte Carlo estimation under parameter uncertainty.
+
+---
+
+### Synthetic Population Model
+
+The model generates \(N=1{,}000{,}000\) synthetic individuals,
+
+$$ X_i=(A_i,B_i,G_i,S_i), $$
+
+representing age, BMI, genetic risk, and smoking exposure. These characteristics are sampled probabilistically to create heterogeneous risk profiles for population-level simulation and counterfactual testing.
+
+---
+
+### Individual Risk Model
+
+Individual disease risk is modeled on the log-odds scale:
+
+$$ z_i=\beta_{0,i}+\beta_{G,i}+\beta_{SG,i}+\beta_{A,i}+\beta_{B,i}. $$
+
+For model parameters \(\theta\),
+
+$$ p_\theta(X_i)=P(Y_i=1\mid X_i,\theta)=\frac{1}{1+e^{-z_i}}. $$
+
+Disease status is then sampled as a Bernoulli outcome, preserving stochastic variation at the individual level.
+
+---
+
+### Long-Latency Exposure Model
+
+BMI-associated risk is allowed to decay with age through
+
+$$ a_i=e^{k\max(A_i-15,0)}, $$
+
+with \(k<0\). The corresponding BMI odds ratio is
+
+$$ OR_i=1+(OR_{\max}-1)a_i. $$
+
+This makes the exposure contribution strongest near the reference age and progressively weaker over time.
+
+---
+
+### Counterfactual Perturbation
+
+The framework perturbs the BMI distribution of individuals under age 25 while holding the remaining model structure fixed. If \(T_\delta\) denotes the exposure perturbation, the population-level response is
+
+$$ \Delta_\theta(\delta) = \mathbb{E}_X \left[ p_\theta(T_\delta(X))-p_\theta(X) \right]. $$
+
+This represents a model-based counterfactual response under stated assumptions, not a directly identified causal effect.
+
+---
+
+### Monte Carlo Estimation and Uncertainty
+
+Population-level outcomes are estimated across 2,500 bootstrap trials. For a statistic \(T\), the simulation produces
+
+$$ T^{(1)},T^{(2)},\ldots,T^{(2500)}, $$
+
+with the median reported as the central estimate and the 2.5th–97.5th percentiles used as uncertainty bounds.
+
+The resulting variation reflects stochastic outcome generation and uncertainty in selected model parameters; structural assumptions are evaluated separately through sensitivity analysis.
+
+---
+
+## Rheumatoid Arthritis as the Testbed
+
+Young-onset rheumatoid arthritis serves as the application domain for the framework because relevant exposures may precede diagnosis by years and exposure histories are only partially observed.
+
+Literature-derived estimates for baseline prevalence, smoking, genetic risk, and interaction effects parameterize the model, while BMI is treated as the primary exposure for counterfactual perturbation.
+
+---
+
+## Computational Implementation
+
+The core simulation engine is implemented in Java, with Python notebooks used for analysis, sensitivity testing, and visualization. Major simulation parameters are exposed explicitly and a fixed random seed supports reproducibility.
+
+---
+
+## Sensitivity, Validation, and Limits
+
+Sensitivity analysis varies younger-population BMI and the latency-decay parameter to test dependence on structural assumptions. Simulated prevalence is compared with aggregate population estimates as a form of model checking.
+
+The framework evaluates counterfactual behavior under stated assumptions; it does not identify a causal effect, establish the true biological latency mechanism, or uniquely validate the model from aggregate agreement. These limitations motivate Stage III validation with patient-level longitudinal data.
 
 ---
 
 ## Repository Structure
 
-The repository is organized into simulation, analysis, and output components:
+- `src/SimulationEngine.java` — core Java simulation engine
+- `analysis/risk_model_analysis.ipynb` — primary analysis notebook
+- `analysis/figures.ipynb` — visualization and sensitivity-analysis notebook
+- `Data/` — saved outputs from BMI and latency-decay sensitivity experiments
+- `Graphs/` — figures generated from the analysis
+- `artifacts/' - related research artifacts
+- `README.md` — mathematical framing, research trajectory, and repository guide
 
-- `Java/Algo.java` — core simulation engine implementing population generation, parameterized risk functions, and Monte Carlo outcome assignment  
-- `Python/ra_all.ipynb` — primary analysis notebook for processing simulation outputs and computing prevalence statistics  
-- `Python/Graphs.ipynb` — visualization of simulation results and parameter sensitivity analyses  
-- `Data/` — CSV outputs generated from simulation runs, including parameter sweeps and aggregated results  
-- `Graphs/` — figures produced from analysis, including distributions and comparative plots used for interpretation  
-
----
-
-## How to Read This Repository
-
-For a quick overview of the project:
-
-1. Review the **Overview** and **Method Summary** sections
-2. Inspect the figures in `Graphs/` to understand simulation outputs
-3. Review `Java/Algo.java` for core simulation logic
-4. Review the notebooks in `Python/` for downstream analysis and visualization
-
-This repository is structured to support both high-level interpretation of results and inspection of the underlying simulation framework.
+This structure intentionally separates the simulation model, analysis, and preserved results so the framework can be inspected as a self-contained reference.
 
 ---
 
-## Validation and Scope
+## Related Research Artifacts
 
-This model is not intended to establish causal relationships, but rather to evaluate whether structured representations of known risk factors can reproduce observed population-level disease patterns under realistic assumptions.
+These artifacts document the original application-driven phase of the project:
 
-Simulated outputs are compared against Global Burden of Disease prevalence estimates to ensure results remain within clinically realistic ranges.
+**[Preprint (bioRxiv)](https://doi.org/10.64898/2026.01.29.702692):** application-focused manuscript on obesity and young-onset rheumatoid arthritis 
 
-The framework is primarily exploratory and methodological, focusing on how long-latency exposure effects can be represented and evaluated using stochastic simulation.
+**[AAI Midwinter Conference Poster](artifacts/AAI_Midwinter_Poster.pdf):** presentation of the original modeling work 
 
----
-
-## Related Materials
-
-- **Preprint (bioRxiv):** [View paper](https://doi.org/10.64898/2026.01.29.702692)
-- **AAI Midwinter Conference Poster:** [View poster](https://osf.io/7my48/overview)
-- **Whiteboard Explanation Video:** [Watch video](https://www.youtube.com/watch?v=VnPhs0IpSGY)
-
-These materials provide additional context on the modeling framework, experimental design, and interpretation of results.
+**[Research Process Essay](artifacts/Research_Process)Essay.pdf):** account of the research and model-development process behind the original study
 
 ---
 
-## Project Status
+## Status and Next Stage
 
-This repository reflects an active research workflow rather than a finalized software release. The codebase is structured to support iterative simulation, analysis, and visualization of epidemiological scenarios.
+This repository preserves the Stage II stochastic framework before empirical longitudinal validation. Stage III continues separately using patient-level data to test where the framework holds, where it fails, and what additional statistical or mathematical methods are required.
 
 ---
 
 ## Authorship
 
-All simulation code, analysis, and visualization in this repository were developed by Tyler Hatstadt in support of the associated preprint and conference presentation.
+The simulation framework, implementation, analysis, and visualizations in this repository were developed by Tyler Hatstadt as part of the research described in the associated preprint.
